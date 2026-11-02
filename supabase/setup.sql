@@ -335,4 +335,210 @@ select pg_catalog.setval(pg_catalog.pg_get_serial_sequence('public.works', 'id')
 select pg_catalog.setval(pg_catalog.pg_get_serial_sequence('public.visits', 'id'),
   greatest((select coalesce(max(id), 1) from public.visits), 1), true);
 
+-- =====================================================
+-- 6. VALORACIONES DE VISITAS
+-- =====================================================
+
+-- Una visita puede tener como máximo una valoración.
+-- visit_id es simultáneamente PK y FK.
+
+create table if not exists public.visit_ratings (
+  visit_id bigint primary key,
+
+  score smallint not null
+    check (score between 1 and 5),
+
+  notes text not null default ''
+    check (char_length(notes) <= 2000),
+
+  created_at timestamptz not null default now(),
+
+  updated_at timestamptz not null default now(),
+
+  constraint visit_ratings_visit_id_fkey
+    foreign key (visit_id)
+    references public.visits(id)
+    on delete cascade
+);
+
+
+-- =====================================================
+-- 7. SEGURIDAD Y RLS
+-- =====================================================
+
+alter table public.visit_ratings enable row level security;
+
+drop policy if exists
+  "Demo users can read visit ratings"
+  on public.visit_ratings;
+
+create policy "Demo users can read visit ratings"
+  on public.visit_ratings
+  for select
+  to anon, authenticated
+  using (true);
+
+-- Lectura permitida.
+-- Escritura exclusivamente mediante RPC.
+
+revoke all on table public.visit_ratings
+  from public, anon, authenticated;
+
+grant select on public.visit_ratings
+  to anon, authenticated;
+
+
+-- =====================================================
+-- 8. RPC PARA CREAR O ACTUALIZAR VALORACIONES
+-- =====================================================
+
+create or replace function public.save_visit_rating(
+  p_visit_id bigint,
+  p_score integer,
+  p_notes text default ''
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_notes text;
+begin
+
+  -- Validar campos obligatorios.
+
+  if p_visit_id is null or p_score is null then
+    return pg_catalog.jsonb_build_object(
+      'success', false,
+      'code', 'MISSING_FIELDS',
+      'message', 'La visita y la puntuación son obligatorias.'
+    );
+  end if;
+
+
+  -- Validar puntuación.
+
+  if p_score < 1 or p_score > 5 then
+    return pg_catalog.jsonb_build_object(
+      'success', false,
+      'code', 'INVALID_SCORE',
+      'message', 'La puntuación debe estar entre 1 y 5.'
+    );
+  end if;
+
+
+  -- Normalizar y validar anotaciones.
+
+  v_notes := coalesce(pg_catalog.btrim(p_notes), '');
+
+  if pg_catalog.char_length(v_notes) > 2000 then
+    return pg_catalog.jsonb_build_object(
+      'success', false,
+      'code', 'NOTES_TOO_LONG',
+      'message', 'Las anotaciones no pueden superar los 2000 caracteres.'
+    );
+  end if;
+
+
+  -- Comprobar que existe la visita.
+
+  if not exists (
+    select 1
+    from public.visits v
+    where v.id = p_visit_id
+  ) then
+    return pg_catalog.jsonb_build_object(
+      'success', false,
+      'code', 'VISIT_NOT_FOUND',
+      'message', 'La visita seleccionada no existe.'
+    );
+  end if;
+
+
+  -- Insertar o actualizar la valoración.
+  -- Si ya existe una para esa visita, se modifica.
+
+  insert into public.visit_ratings (
+    visit_id,
+    score,
+    notes
+  )
+  values (
+    p_visit_id,
+    p_score,
+    v_notes
+  )
+
+  on conflict (visit_id)
+  do update set
+    score = excluded.score,
+    notes = excluded.notes,
+    updated_at = pg_catalog.now();
+
+
+  return pg_catalog.jsonb_build_object(
+    'success', true,
+    'visit_id', p_visit_id,
+    'message', 'Valoración guardada correctamente.'
+  );
+
+end;
+$$;
+
+
+-- Permisos de ejecución de la función.
+
+revoke all on function public.save_visit_rating(bigint, integer, text)
+  from public, anon, authenticated;
+
+grant execute on function public.save_visit_rating(bigint, integer, text)
+  to anon, authenticated;
+
+
+-- =====================================================
+-- 9. DATOS FICTICIOS DE VALORACIONES
+-- =====================================================
+
+-- Se utilizan algunas de las visitas de demostración
+-- creadas anteriormente.
+--
+-- ON CONFLICT DO NOTHING evita sobrescribir valoraciones
+-- que un usuario haya modificado posteriormente.
+
+insert into public.visit_ratings (
+  visit_id,
+  score,
+  notes
+)
+select
+  demo.visit_id,
+  demo.score,
+  demo.notes
+from (
+  values
+    (
+      1::bigint, 1, 1, 4::smallint,
+      'Trabajo realizado correctamente. Se recomienda revisar el acabado de una conexión.'
+    ),
+    (
+      3::bigint, 2, 3, 5::smallint,
+      'Visita completada satisfactoriamente. Excelente ejecución y cumplimiento de los tiempos previstos.'
+    ),
+    (
+      5::bigint, 3, 5, 3::smallint,
+      'Trabajo aceptable. Se han detectado pequeños detalles pendientes de revisión.'
+    )
+) as demo(visit_id, technician_id, work_id, score, notes)
+
+where exists (
+  select 1
+  from public.visits v
+  where v.id = demo.visit_id
+    and v.technician_id = demo.technician_id
+    and v.work_id = demo.work_id
+)
+
+on conflict (visit_id) do nothing;
+
 commit;
