@@ -1,68 +1,99 @@
 # ObraPlan · Planificador de visitas técnicas
 
-Aplicación web de práctica para planificar visitas de cuatro técnicos a obras de distintos municipios. Está construida con React, TypeScript, Tailwind CSS 4, Vite y Supabase (PostgreSQL).
+Aplicación web de práctica para planificar y gestionar visitas de cuatro técnicos a obras situadas en distintos municipios. Permite programar visitas, validar las restricciones de agenda, cancelarlas y registrar valoraciones del trabajo realizado.
+
+Está construida con **React, TypeScript, Tailwind CSS 4, Vite y Supabase (PostgreSQL)**. Las reglas críticas de planificación se ejecutan en PostgreSQL para evitar depender exclusivamente de las validaciones del cliente.
 
 ## Qué incluye
 
-- Alta de visitas indicando técnico, obra, fecha, hora de inicio y duración.
-- Validación en PostgreSQL de solapamientos, desplazamiento mínimo y jornada laboral.
-- Bloqueo transaccional por técnico para evitar que dos peticiones simultáneas reserven el mismo hueco.
-- Cancelación lógica: la visita permanece visible como `Cancelada`, pero deja de bloquear el horario.
-- Listado ordenado por fecha y hora, con filtros por técnico y fecha.
-- Cuatro técnicos, seis obras y siete visitas ficticias precargadas desde SQL.
+- **Programación de visitas:** selección de técnico, obra, fecha, hora de inicio y duración.
+- **Validación centralizada en PostgreSQL:** control de solapamientos, desplazamiento mínimo entre obras y jornada laboral.
+- **Control de concurrencia:** bloqueo transaccional por técnico para evitar que dos peticiones simultáneas reserven el mismo intervalo.
+- **Cancelación lógica:** las visitas canceladas permanecen en el historial, pero dejan de bloquear la agenda.
+- **Listado y filtros:** visitas ordenadas por fecha y hora, con filtros por técnico y fecha.
+- **Valoración de visitas:** puntuación de 1 a 5 y campo de anotaciones. Las valoraciones pueden crearse y editarse posteriormente.
+- **Notificaciones de interfaz:** mensajes de confirmación y error mediante un componente reutilizable.
+- **Datos de demostración:** cuatro técnicos, seis obras y siete visitas ficticias precargadas mediante SQL.
 
 ## Arranque rápido (objetivo: menos de 10 minutos)
 
-**Requisitos:** Node.js 20.19+ (o 22.12+) y npm. Necesitas un proyecto de Supabase; para esta demo no hace falta instalar Docker ni Supabase CLI.
+### Requisitos
 
-1. **Clona el repositorio e instala dependencias.**
+- Node.js 20.19+ (o 22.12+).
+- npm.
+- Un proyecto de Supabase.
 
-   ```bash
-   git clone https://github.com/TU-USUARIO/planificador-visitas.git
-   cd planificador-visitas
-   npm install
-   ```
+Para esta demo no es necesario instalar Docker ni Supabase CLI.
 
-2. **Crea un proyecto gratuito en Supabase** desde [supabase.com/dashboard](https://supabase.com/dashboard). Puedes usar uno ya existente.
+### 1. Clonar el repositorio e instalar dependencias
 
-3. **Crea la base de datos.** En el panel de Supabase abre `SQL Editor` → `New query`. Copia todo el contenido de [`supabase/setup.sql`](supabase/setup.sql), ejecútalo y comprueba que termina sin errores. Este script crea las tablas, índices, políticas RLS, funciones RPC y datos de ejemplo. Para comprobar los registros, ejecuta después [`supabase/verify.sql`](supabase/verify.sql). Para probar las reglas (el script revierte sus datos de prueba), ejecuta [`supabase/test_rules.sql`](supabase/test_rules.sql).
+```bash
+git clone https://github.com/TU-USUARIO/planificador-visitas.git
+cd planificador-visitas
+npm install
+```
 
-4. **Configura las credenciales públicas del proyecto.** En Supabase abre `Project Settings` → `API` (o `Connect`) y copia la Project URL y la Publishable key. En la raíz del repositorio, crea un archivo `.env` a partir del ejemplo:
+### 2. Crear un proyecto de Supabase
 
-   PowerShell:
+Crea un proyecto gratuito desde [Supabase Dashboard](https://supabase.com/dashboard). También puedes utilizar un proyecto existente.
 
-   ```powershell
-   Copy-Item .env.example .env
-   ```
+### 3. Crear la base de datos
 
-   CMD:
+En el panel de Supabase, abre `SQL Editor` → `New query`.
 
-   ```cmd
-   copy .env.example .env
-   ```
+Copia el contenido completo de `supabase/setup.sql` y ejecútalo. Este script prepara la base de datos para una instalación nueva: tablas, índices, políticas RLS, funciones RPC y datos ficticios, incluidas las valoraciones de ejemplo.
 
-   Edita `.env` y sustituye los valores:
+Puedes comprobar que los registros se han creado correctamente ejecutando:
 
-   ```dotenv
-   VITE_SUPABASE_URL=https://TU-PROJECT-REF.supabase.co
-   VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_TU_CLAVE
-   ```
+- `supabase/verify.sql`: consultas de comprobación.
+- `supabase/test_rules.sql`: pruebas de las reglas de planificación. El script revierte sus datos de prueba.
 
-   En proyectos antiguos de Supabase puedes pegar la `anon` key en esa misma variable. **No pongas nunca la `service_role` key ni una Secret key en el frontend.**
+**Si ya tienes una base de datos creada con una versión anterior**, ejecuta `supabase/add_visit_ratings.sql` para incorporar la funcionalidad de valoraciones sin tener que recrear toda la base de datos. No ejecutes el script de instalación inicial sobre una base de datos que ya contenga datos que quieras conservar.
 
-5. **Arranca la aplicación.**
+### 4. Configurar las credenciales de Supabase
 
-   ```bash
-   npm run dev
-   ```
+En Supabase, abre `Project Settings` → `API` o `Connect` y copia la Project URL y la Publishable key.
 
-   Abre la URL local que indique Vite (normalmente `http://localhost:5173`). Para comprobar también la compilación de producción:
+En la raíz del repositorio, crea un archivo `.env` a partir del ejemplo.
 
-   ```bash
-   npm run build
-   ```
+PowerShell:
 
-> El repositorio no contiene `.env`. Cada persona configura su propio proyecto Supabase y sus claves. El archivo está excluido de Git mediante `.gitignore`.
+```powershell
+Copy-Item .env.example .env
+```
+
+CMD:
+
+```cmd
+copy .env.example .env
+```
+
+Edita `.env` y sustituye los valores:
+
+```dotenv
+VITE_SUPABASE_URL=https://TU-PROJECT-REF.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_TU_CLAVE
+```
+
+En proyectos antiguos de Supabase puedes utilizar la clave `anon` en esa misma variable.
+
+**No introduzcas nunca una `service_role` key ni una Secret key en el frontend.** Las variables con prefijo `VITE_` se incorporan al código que recibe el navegador.
+
+### 5. Arrancar la aplicación
+
+```bash
+npm run dev
+```
+
+Abre la URL local que indique Vite, normalmente `http://localhost:5173`.
+
+Para comprobar la compilación de producción:
+
+```bash
+npm run build
+```
+
+El repositorio no contiene el archivo `.env`. Cada persona configura sus propias credenciales y conexión a Supabase. Este archivo está excluido de Git mediante `.gitignore`.
 
 ## Estructura del repositorio
 
@@ -76,57 +107,135 @@ planificador-visitas/
 ├── .gitignore
 ├── README.md
 ├── supabase/
-│   ├── setup.sql          # Esquema, RLS, funciones y datos ficticios
-│   ├── verify.sql         # Consultas de comprobación
-│   └── test_rules.sql     # Pruebas de humo con rollback
+│   ├── setup.sql                  # Esquema, RLS, RPC y datos ficticios
+│   ├── add_visit_ratings.sql      # Migración para incorporar valoraciones
+│   ├── verify.sql                 # Consultas de comprobación
+│   └── test_rules.sql             # Pruebas de reglas con rollback
 └── src/
-    ├── main.tsx           # Entrada React
-    ├── App.tsx             # Estado, carga de datos y composición de pantalla
-    ├── index.css           # Tailwind y estilos globales
+    ├── main.tsx                   # Entrada de React
+    ├── App.tsx                    # Estado, carga de datos y composición
+    ├── index.css                  # Tailwind y estilos globales
     ├── components/
-    │   ├── VisitForm.tsx   # Formulario de programación
-    │   └── VisitsTable.tsx # Tabla, estados y cancelación
+    │   ├── VisitForm.tsx           # Formulario de programación
+    │   ├── VisitsTable.tsx         # Tabla, filtros, estados y valoraciones
+    │   ├── VisitRatingModal.tsx    # Creación y edición de valoraciones
+    │   └── FeedbackBanner.tsx      # Notificaciones de éxito y error
     ├── lib/
-    │   └── supabase.ts     # Cliente Supabase y lectura de variables de entorno
+    │   └── supabase.ts             # Cliente Supabase y variables de entorno
     ├── services/
-    │   └── scheduleService.ts # Consultas y llamadas RPC
+    │   └── scheduleService.ts      # Consultas y llamadas RPC
     ├── types/
-    │   └── index.ts        # Tipos de dominio
+    │   └── index.ts                # Tipos de dominio y mensajes
     └── utils/
-        └── date.ts         # Formato de fecha y hora local
+        └── date.ts                 # Formato de fecha y hora local
 ```
 
-## Modelo de datos y reglas
+## Modelo de datos y reglas de negocio
+
+### Modelo de datos
+
+La aplicación utiliza cuatro tablas principales:
 
 - `technicians`: técnicos de la empresa.
 - `works`: obras, con municipio y dirección de ejemplo.
-- `visits`: técnico, obra, fecha, hora inicial, duración, hora final calculada y estado.
+- `visits`: visitas programadas, con técnico, obra, fecha, hora de inicio, duración, hora final calculada y estado.
+- `visit_ratings`: valoraciones asociadas a las visitas, con puntuación, anotaciones y fechas de creación y actualización.
 
-La hora final es una columna generada en PostgreSQL. El cliente no puede escribir directamente en las tablas: solo tiene permisos de lectura. Para guardar o cancelar debe llamar a `create_visit` o `cancel_visit`.
+Una visita puede tener una única valoración. La relación se establece mediante `visit_id`, que también actúa como clave primaria de `visit_ratings`.
 
-`create_visit` realiza las comprobaciones en base de datos. Antes de consultar la agenda bloquea la planificación del técnico mediante un *transaction-level advisory lock*. Así, dos altas concurrentes para el mismo técnico no pueden validar simultáneamente una agenda antigua y reservar ambas el mismo intervalo. Se comprueban:
+La puntuación debe estar comprendida entre 1 y 5. Las anotaciones son opcionales y tienen un límite de longitud.
 
-1. **Solapamiento:** dos visitas activas del mismo técnico no pueden cruzarse, aunque sean en la misma obra.
-2. **Desplazamiento:** si las obras son distintas, deben quedar al menos 30 minutos libres entre el final de una visita y el inicio de la otra. Se evalúa tanto si la visita nueva se coloca después como si se coloca antes de una visita ya existente.
-3. **Jornada:** la visita completa debe quedar entre las 08:00 y las 17:00.
+### Funciones de base de datos
 
-La cancelación cambia el estado a `cancelled`; no borra la visita. Las consultas de validación solo consideran filas con estado `scheduled`.
+La aplicación utiliza funciones RPC de PostgreSQL para realizar las operaciones de escritura:
+
+- `create_visit`: programa una visita después de validar las restricciones de agenda.
+- `cancel_visit`: cancela una visita sin eliminar su registro.
+- `save_visit_rating`: crea o actualiza la valoración de una visita.
+
+La hora final de cada visita es una columna generada en PostgreSQL.
+
+El cliente no dispone de permisos de escritura directa sobre las tablas. Las operaciones de escritura se realizan mediante las funciones RPC correspondientes.
+
+### Reglas de planificación
+
+`create_visit` realiza las comprobaciones en la base de datos. Antes de consultar la agenda, bloquea la planificación del técnico mediante un *transaction-level advisory lock*.
+
+Así, dos altas concurrentes para un mismo técnico no pueden validar simultáneamente una agenda desactualizada y reservar ambas el mismo intervalo.
+
+Se comprueban las siguientes reglas:
+
+1. **Solapamiento:** dos visitas activas del mismo técnico no pueden cruzarse, aunque correspondan a la misma obra.
+2. **Desplazamiento:** si las obras son distintas, deben quedar al menos 30 minutos libres entre el final de una visita y el inicio de la siguiente. Se comprueba tanto cuando la nueva visita se programa después de otra como cuando se inserta antes de una ya existente.
+3. **Jornada laboral:** la visita completa debe quedar dentro del horario comprendido entre las 08:00 y las 17:00.
+
+La cancelación cambia el estado de la visita a `cancelled`, pero no elimina el registro. Las comprobaciones de disponibilidad únicamente consideran visitas con estado `scheduled`.
+
+Las valoraciones se guardan de forma independiente de la programación. Una valoración puede modificarse sin alterar la fecha, duración o estado de la visita.
 
 ## Justificación, alcance y supuestos
 
-**Qué he hecho y qué queda pendiente.** He implementado el flujo básico de consulta, programación, validación y cancelación, más filtros y datos de demostración. Quedan fuera la autenticación, los permisos por usuario/empresa, la edición de visitas, festivos, calendarios por técnico, cálculo real de rutas y tiempos de desplazamiento, notificaciones y pruebas automatizadas de extremo a extremo.
+### Qué se ha implementado y qué queda pendiente
 
-**Decisiones principales.** Vite permite un arranque y compilación sencillos; TypeScript ayuda a detectar errores de forma temprana; Tailwind permite mantener la interfaz en el propio componente; Supabase aporta PostgreSQL y una API lista para consumir desde React. La validación crítica vive en funciones SQL para que no dependa de que el formulario se comporte correctamente. RLS está habilitado y las tablas no conceden permisos de escritura directa al cliente.
+Se ha implementado el flujo de consulta, programación, validación y cancelación de visitas, junto con los filtros y los datos de demostración. También se ha añadido la posibilidad de registrar y modificar valoraciones con anotaciones.
 
-**Supuestos.** La empresa trabaja en una única zona horaria operativa (Europe/Madrid); por eso la fecha y la hora se guardan como `date` y `time` locales, no como instantes UTC. Las visitas no cruzan de día. La duración se expresa en minutos, entre 15 y 540, en múltiplos de 15. Los intervalos se interpretan como `[inicio, fin)`: una visita puede empezar justo cuando termina otra si no hay desplazamiento que aplicar. La regla de 30 minutos solo se aplica entre obras distintas; se asume que no hay desplazamiento adicional cuando dos visitas son en la misma obra. Los 30 minutos son un margen fijo, no una ruta calculada por municipio. La jornada admite terminar exactamente a las 17:00.
+Quedan fuera del alcance actual:
 
-**Uso de IA y revisión.** Se ha utilizado IA como apoyo para diseñar el modelo, generar el esqueleto de React y redactar la primera versión de las funciones SQL. La primera propuesta generada para la regla de desplazamiento solo contemplaba la visita anterior; la corregí para comprobar también la visita posterior cuando la nueva reserva se inserta antes de otra que ya existe. También revisé que la validación crítica no se quedara en React: la trasladé a PostgreSQL y añadí un bloqueo transaccional por técnico para cubrir peticiones concurrentes. El resultado se debe contrastar con los casos de prueba antes de usarlo con datos reales.
+- Autenticación y permisos por usuario o empresa.
+- Edición de los datos de una visita ya programada.
+- Gestión de festivos y calendarios individuales por técnico.
+- Cálculo real de rutas y tiempos de desplazamiento entre municipios.
+- Notificaciones externas.
+- Pruebas automatizadas de extremo a extremo.
+
+### Decisiones técnicas
+
+- **Vite** simplifica el desarrollo local y la compilación de producción.
+- **TypeScript** permite detectar incompatibilidades de tipos durante el desarrollo.
+- **Tailwind CSS 4** facilita la implementación de la interfaz mediante clases de utilidad.
+- **Supabase** proporciona PostgreSQL y una API para conectar el frontend con la base de datos.
+- **PostgreSQL RPC** centraliza las reglas críticas para que no dependan exclusivamente de la lógica de React.
+- **Componentes reutilizables** separan responsabilidades: formulario, tabla, modal de valoración y notificaciones.
+
+### Supuestos del sistema
+
+- La empresa trabaja en una única zona horaria operativa: `Europe/Madrid`.
+- Por este motivo, las fechas y horas se almacenan como tipos `date` y `time` locales, no como instantes UTC.
+- Las visitas no pueden cruzar de día.
+- La duración se expresa en minutos, entre 15 y 540, en múltiplos de 15.
+- Los intervalos se interpretan como `[inicio, fin)`: una visita puede empezar justo cuando termina otra si no hay desplazamiento que aplicar.
+- La regla de 30 minutos solo se aplica entre obras distintas. Se asume que no existe desplazamiento adicional cuando dos visitas corresponden a la misma obra.
+- Los 30 minutos constituyen un margen fijo; no representan un tiempo de ruta calculado.
+- La jornada permite terminar exactamente a las 17:00.
+
+## Uso de IA y revisión
+
+Se ha utilizado IA como apoyo para diseñar el modelo de datos, generar el esqueleto de React y redactar las primeras versiones de las funciones SQL.
+
+La primera propuesta para la regla de desplazamiento solo contemplaba la visita anterior. Se corrigió para comprobar también la visita posterior cuando una nueva reserva se inserta antes de otra ya existente.
+
+También se revisó que la validación crítica no dependiera exclusivamente del frontend: se trasladó a PostgreSQL y se añadió un bloqueo transaccional por técnico para cubrir peticiones concurrentes.
+
+El resultado debe contrastarse con los casos de prueba antes de utilizarlo con datos reales.
 
 ## Seguridad y límites de la demo
 
-La `Publishable key` (o la antigua `anon key`) está pensada para estar en el cliente; **no es una contraseña**. RLS limita la lectura y evita escrituras directas sobre las tablas. Las funciones RPC se han concedido a los roles `anon` y `authenticated` para que la demo funcione sin pantalla de login. Eso significa que cualquier persona que pueda abrir una instancia pública conectada a ese proyecto puede consultar y modificar la agenda de demostración llamando a esas funciones, no solo desde la interfaz.
+La `Publishable key` (o la antigua `anon key`) está diseñada para utilizarse en el cliente y no es una contraseña. RLS está habilitado y las tablas no conceden permisos de escritura directa al cliente.
 
-Por tanto, usa datos ficticios y un proyecto Supabase dedicado a esta prueba. Antes de producción hay que añadir Supabase Auth, identificar la empresa/usuario y restringir cada operación por pertenencia y permisos. No publiques nunca una `service_role` key ni una Secret key en variables `VITE_*`, porque Vite las incorpora al código del navegador.
+Las funciones RPC se han concedido a los roles `anon` y `authenticated` para que la demo funcione sin una pantalla de inicio de sesión. Esto incluye las funciones de programación, cancelación y valoración.
+
+Por tanto, cualquier persona que pueda acceder a una instancia pública conectada a ese proyecto puede consultar y modificar la agenda y las valoraciones mediante las funciones RPC, no solo desde la interfaz.
+
+Utiliza exclusivamente datos ficticios y un proyecto de Supabase dedicado a esta demostración.
+
+Antes de utilizar la aplicación en producción sería necesario:
+
+- Incorporar Supabase Auth.
+- Identificar a cada usuario y su empresa.
+- Restringir las operaciones por pertenencia y permisos.
+- Revisar las políticas RLS y las funciones `SECURITY DEFINER` para que cada operación compruebe la autorización correspondiente.
+
+**Nunca publiques una `service_role` key ni una Secret key en variables `VITE_*`**, ya que Vite las incorpora al código del navegador.
 
 ## Documentación oficial
 
