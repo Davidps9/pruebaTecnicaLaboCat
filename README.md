@@ -185,7 +185,7 @@ Las valoraciones se guardan de forma independiente de la programación. Una valo
 
 ## Justificación, alcance y supuestos
 
-### Qué se ha implementado y qué queda pendiente
+### Qué se ha implementado y propuestas
 
 Se ha implementado el flujo de consulta, programación, validación y cancelación de visitas, junto con los filtros y los datos de demostración. También se ha añadido la posibilidad de registrar y modificar valoraciones con anotaciones.
 
