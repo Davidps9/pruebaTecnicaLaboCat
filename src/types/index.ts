@@ -38,3 +38,8 @@ export interface RpcResult {
   message?: string
   visit_id?: number
 }
+
+export interface FeedbackMessage {
+  type: 'success' | 'error'
+  message: string
+}

@@ -1,6 +1,15 @@
 import { useState, type FormEvent } from 'react'
-import type { CreateVisitInput, Technician, Work } from '../types'
-import { getLocalDateInputValue, minutesToTime } from '../utils/date'
+
+import type {
+  CreateVisitInput,
+  Technician,
+  Work,
+} from '../../types'
+
+import {
+  getLocalDateInputValue,
+  minutesToTime,
+} from '../../utils/date'
 
 interface VisitFormProps {
   technicians: Technician[]
@@ -21,7 +30,11 @@ export default function VisitForm({
 }: VisitFormProps) {
   const [technicianId, setTechnicianId] = useState('')
   const [workId, setWorkId] = useState('')
-  const [visitDate, setVisitDate] = useState(getLocalDateInputValue())
+
+  const [visitDate, setVisitDate] = useState(
+    getLocalDateInputValue()
+  )
+
   const [startTime, setStartTime] = useState('09:00')
   const [durationMinutes, setDurationMinutes] = useState(60)
 
@@ -29,6 +42,7 @@ export default function VisitForm({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
     const saved = await onSubmit({
       technicianId: Number(technicianId),
       workId: Number(workId),
@@ -45,10 +59,17 @@ export default function VisitForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+
+      {/* Técnico */}
+
       <div>
-        <label htmlFor="technician" className="mb-2 block text-sm font-medium text-slate-300">
+        <label
+          htmlFor="technician"
+          className="mb-2 block text-sm font-medium text-slate-300"
+        >
           Técnico
         </label>
+
         <select
           id="technician"
           className="field"
@@ -58,6 +79,7 @@ export default function VisitForm({
           disabled={disabled || technicians.length === 0}
         >
           <option value="">Selecciona un técnico</option>
+
           {technicians.map((technician) => (
             <option key={technician.id} value={technician.id}>
               {technician.name} · {technician.specialty}
@@ -66,10 +88,16 @@ export default function VisitForm({
         </select>
       </div>
 
+      {/* Obra */}
+
       <div>
-        <label htmlFor="work" className="mb-2 block text-sm font-medium text-slate-300">
+        <label
+          htmlFor="work"
+          className="mb-2 block text-sm font-medium text-slate-300"
+        >
           Obra
         </label>
+
         <select
           id="work"
           className="field"
@@ -79,6 +107,7 @@ export default function VisitForm({
           disabled={disabled || works.length === 0}
         >
           <option value="">Selecciona una obra</option>
+
           {works.map((work) => (
             <option key={work.id} value={work.id}>
               {work.name} · {work.municipality}
@@ -87,11 +116,17 @@ export default function VisitForm({
         </select>
       </div>
 
+      {/* Fecha y hora */}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="visit-date" className="mb-2 block text-sm font-medium text-slate-300">
+          <label
+            htmlFor="visit-date"
+            className="mb-2 block text-sm font-medium text-slate-300"
+          >
             Fecha
           </label>
+
           <input
             id="visit-date"
             className="field"
@@ -102,10 +137,15 @@ export default function VisitForm({
             disabled={disabled}
           />
         </div>
+
         <div>
-          <label htmlFor="start-time" className="mb-2 block text-sm font-medium text-slate-300">
+          <label
+            htmlFor="start-time"
+            className="mb-2 block text-sm font-medium text-slate-300"
+          >
             Hora de inicio
           </label>
+
           <input
             id="start-time"
             className="field"
@@ -120,44 +160,76 @@ export default function VisitForm({
         </div>
       </div>
 
+      {/* Duración */}
+
       <div>
-        <label htmlFor="duration" className="mb-2 block text-sm font-medium text-slate-300">
+        <label
+          htmlFor="duration"
+          className="mb-2 block text-sm font-medium text-slate-300"
+        >
           Duración
         </label>
+
         <select
           id="duration"
           className="field"
           value={durationMinutes}
           onChange={(event) => {
             const nextDuration = Number(event.target.value)
+
             setDurationMinutes(nextDuration)
-            const nextMaxStart = minutesToTime(17 * 60 - nextDuration)
-            if (startTime > nextMaxStart) setStartTime(nextMaxStart)
+
+            const nextMaxStart = minutesToTime(
+              17 * 60 - nextDuration
+            )
+
+            if (startTime > nextMaxStart) {
+              setStartTime(nextMaxStart)
+            }
           }}
           disabled={disabled}
         >
           {durationOptions.map((duration) => (
             <option key={duration} value={duration}>
-              {duration < 60 ? `${duration} minutos` : `${Math.floor(duration / 60)} h${duration % 60 ? ` ${duration % 60} min` : ''}`}
+              {duration < 60
+                ? `${duration} minutos`
+                : `${Math.floor(duration / 60)} h${duration % 60 ? ` ${duration % 60} min` : ''
+                }`}
             </option>
           ))}
         </select>
       </div>
 
+      {/* Información de planificación */}
+
       <div className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-3 text-xs leading-5 text-slate-400">
         <div className="flex items-center justify-between">
           <span>Jornada permitida</span>
-          <span className="font-semibold text-slate-200">08:00 – 17:00</span>
+          <span className="font-semibold text-slate-200">
+            08:00 – 17:00
+          </span>
         </div>
+
         <div className="mt-1 flex items-center justify-between">
           <span>Desplazamiento entre obras</span>
-          <span className="font-semibold text-slate-200">30 min mínimo</span>
+          <span className="font-semibold text-slate-200">
+            30 min mínimo
+          </span>
         </div>
       </div>
 
+      {/* Submit */}
+
       <button
         type="submit"
-        disabled={disabled || submitting || technicians.length === 0 || works.length === 0}
+        disabled={
+          disabled ||
+          submitting ||
+          !technicianId ||
+          !workId ||
+          technicians.length === 0 ||
+          works.length === 0
+        }
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-400 px-4 py-3 font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? (
@@ -167,7 +239,7 @@ export default function VisitForm({
           </>
         ) : (
           <>
-            <span aria-hidden="true" className="text-lg leading-none">＋</span>
+            <span className="text-lg leading-none">＋</span>
             Programar visita
           </>
         )}
