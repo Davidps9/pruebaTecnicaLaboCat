@@ -192,7 +192,7 @@ Se ha implementado el flujo de consulta, programación, validación y cancelaci�
 Propuestas fuera del alcance actual de la prueba:
 
 - Autenticación y permisos por usuario o empresa.
-- Edición de los datos de una visita ya programada, junto con la posibilidad de añadir más estados de visita.
+- Edición de los datos de una visita ya programada, junto con la posibilidad de que el usuario pueda añadir, editar y borrar datos, ( municipios, técnicos, obras y demás ).
 - Gestión de festivos y calendarios individuales por técnico.
 - Cálculo real de rutas y tiempos de desplazamiento entre municipios.
 - Notificaciones externas.
