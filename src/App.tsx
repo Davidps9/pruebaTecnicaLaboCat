@@ -506,7 +506,7 @@ export default function App() {
 
                 <input
                   aria-label="Filtrar por fecha"
-                  className="field min-w-36 py-2 text-xs [color-scheme:dark]"
+                  className="field min-w-36 py-2 text-xs scheme:dark"
                   type="date"
                   value={dateFilter}
                   onChange={(event) => setDateFilter(event.target.value)}
