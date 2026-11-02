@@ -314,7 +314,7 @@ export default function App() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,_rgba(14,116,144,0.13),_transparent_43%),#0b1220] text-slate-100">
+    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,rgba(14,116,144,0.13),transparent_43%),#0b1220] text-slate-100">
 
       <div className="mx-auto max-w-[1800px] px-4 py-7 sm:px-7 lg:px-10 lg:py-10">
 
