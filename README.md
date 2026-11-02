@@ -11,10 +11,13 @@ Está construida con **React, TypeScript, Tailwind CSS 4, Vite y Supabase (Postg
 - **Control de concurrencia:** bloqueo transaccional por técnico para evitar que dos peticiones simultáneas reserven el mismo intervalo.
 - **Cancelación lógica:** las visitas canceladas permanecen en el historial, pero dejan de bloquear la agenda.
 - **Listado y filtros:** visitas ordenadas por fecha y hora, con filtros por técnico y fecha.
-- **Valoración de visitas:** puntuación de 1 a 5 y campo de anotaciones. Las valoraciones pueden crearse y editarse posteriormente.
 - **Notificaciones de interfaz:** mensajes de confirmación y error mediante un componente reutilizable.
 - **Datos de demostración:** cuatro técnicos, seis obras y siete visitas ficticias precargadas mediante SQL.
 
+### Funcionalidad extra
+
+- **Valoración de visitas:** puntuación de 1 a 5 y campo de anotaciones. Las valoraciones pueden crearse y editarse posteriormente.
+  
 ## Arranque rápido (objetivo: menos de 10 minutos)
 
 ### Requisitos
@@ -47,8 +50,6 @@ Puedes comprobar que los registros se han creado correctamente ejecutando:
 
 - `supabase/verify.sql`: consultas de comprobación.
 - `supabase/test_rules.sql`: pruebas de las reglas de planificación. El script revierte sus datos de prueba.
-
-**Si ya tienes una base de datos creada con una versión anterior**, ejecuta `supabase/add_visit_ratings.sql` para incorporar la funcionalidad de valoraciones sin tener que recrear toda la base de datos. No ejecutes el script de instalación inicial sobre una base de datos que ya contenga datos que quieras conservar.
 
 ### 4. Configurar las credenciales de Supabase
 
@@ -108,7 +109,6 @@ planificador-visitas/
 ├── README.md
 ├── supabase/
 │   ├── setup.sql                  # Esquema, RLS, RPC y datos ficticios
-│   ├── add_visit_ratings.sql      # Migración para incorporar valoraciones
 │   ├── verify.sql                 # Consultas de comprobación
 │   └── test_rules.sql             # Pruebas de reglas con rollback
 └── src/
@@ -116,18 +116,28 @@ planificador-visitas/
     ├── App.tsx                    # Estado, carga de datos y composición
     ├── index.css                  # Tailwind y estilos globales
     ├── components/
-    │   ├── VisitForm.tsx           # Formulario de programación
-    │   ├── VisitsTable.tsx         # Tabla, filtros, estados y valoraciones
-    │   ├── VisitRatingModal.tsx    # Creación y edición de valoraciones
-    │   └── FeedbackBanner.tsx      # Notificaciones de éxito y error
+    │   ├── visits/                # Formulario de programación
+    │   │   ├── VisitFilter.tsx         # Filtros por técnico y fecha
+    │   │   ├── VisitsTable.tsx         # Tabla, filtros, estados y valoraciones
+    │   │   ├── VisitRatingModal.tsx    # Creación y edición de valoraciones
+    │   │   └── VisitForm.tsx           # Formulario de programación de visitas
+    │   ├── feedback/              # Notificaciones de interfaz
+    │   │   ├── FeedbackBanner.tsx      # Notificaciones de éxito y error
+    │   │   └── SetupNotice.tsx         # Aviso de configuración de Supabase
+    │   ├── dashboard/             # Estructura de la página y tarjetas de estadísticas
+    │   │   └──  StatCard.tsx            # Tarjeta de estadísticas
+    │   ├── layout/                # Estructura de la cabecera
+    │   │   └──  AppHeader.tsx           # Cabecera de la aplicación
     ├── lib/
-    │   └── supabase.ts             # Cliente Supabase y variables de entorno
+    │   └── supabase.ts            # Cliente Supabase y variables de entorno
+    ├── hooks/
+    │   └── useSupabase.ts         # Carga de datos y estado de la aplicación
     ├── services/
-    │   └── scheduleService.ts      # Consultas y llamadas RPC
+    │   └── scheduleService.ts     # Consultas y llamadas RPC
     ├── types/
-    │   └── index.ts                # Tipos de dominio y mensajes
+    │   └── index.ts               # Tipos de dominio y mensajes
     └── utils/
-        └── date.ts                 # Formato de fecha y hora local
+        └── date.ts                # Formato de fecha y hora local
 ```
 
 ## Modelo de datos y reglas de negocio
@@ -179,10 +189,10 @@ Las valoraciones se guardan de forma independiente de la programación. Una valo
 
 Se ha implementado el flujo de consulta, programación, validación y cancelación de visitas, junto con los filtros y los datos de demostración. También se ha añadido la posibilidad de registrar y modificar valoraciones con anotaciones.
 
-Quedan fuera del alcance actual:
+Propuestas fuera del alcance actual de la prueba:
 
 - Autenticación y permisos por usuario o empresa.
-- Edición de los datos de una visita ya programada.
+- Edición de los datos de una visita ya programada, junto con la posibilidad de añadir más estados de visita.
 - Gestión de festivos y calendarios individuales por técnico.
 - Cálculo real de rutas y tiempos de desplazamiento entre municipios.
 - Notificaciones externas.
@@ -210,13 +220,13 @@ Quedan fuera del alcance actual:
 
 ## Uso de IA y revisión
 
-Se ha utilizado IA como apoyo para diseñar el modelo de datos, generar el esqueleto de React y redactar las primeras versiones de las funciones SQL.
+Se ha utilizado IA (ChatGPT en navegador) como apoyo para diseñar el modelo de datos, generar el esqueleto de React y redactar las primeras versiones de las funciones SQL.
 
 La primera propuesta para la regla de desplazamiento solo contemplaba la visita anterior. Se corrigió para comprobar también la visita posterior cuando una nueva reserva se inserta antes de otra ya existente.
 
 También se revisó que la validación crítica no dependiera exclusivamente del frontend: se trasladó a PostgreSQL y se añadió un bloqueo transaccional por técnico para cubrir peticiones concurrentes.
 
-El resultado debe contrastarse con los casos de prueba antes de utilizarlo con datos reales.
+Además, se han corregido los errores de sintaxis y estilo que ha generado la IA, principalmente con clases antiguas de Tailwind CSS. Por otro lado, también se han corregido otros errores de importación de módulos y de tipado, que seguramente se deban a la falta de contexto por estar en navegador y no en modo agente.
 
 ## Seguridad y límites de la demo
 
