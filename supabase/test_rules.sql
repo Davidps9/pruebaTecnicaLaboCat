@@ -6,6 +6,9 @@ begin;
 
 do $$
 declare
+  v_rating_result jsonb;
+  v_rating_score smallint;
+  v_rating_notes text;
   v_result jsonb;
   v_cancel_result jsonb;
   v_test_visit_id bigint;
@@ -42,6 +45,60 @@ begin
   end if;
 
   v_test_visit_id := (v_result ->> 'visit_id')::bigint;
+    -- Prueba de valoración: creación.
+  v_rating_result := public.save_visit_rating(
+    v_test_visit_id,
+    4,
+    'Primera valoración de prueba.'
+  );
+
+  if v_rating_result ->> 'success' is distinct from 'true' then
+    raise exception 'Falló la creación de la valoración. Resultado: %', v_rating_result;
+  end if;
+
+  -- Prueba de valoración: actualización mediante UPSERT.
+  v_rating_result := public.save_visit_rating(
+    v_test_visit_id,
+    5,
+    'Valoración actualizada correctamente.'
+  );
+
+  if v_rating_result ->> 'success' is distinct from 'true' then
+    raise exception 'Falló la actualización de la valoración. Resultado: %', v_rating_result;
+  end if;
+
+  -- Comprobar que se ha actualizado el registro existente.
+  select score, notes
+  into v_rating_score, v_rating_notes
+  from public.visit_ratings
+  where visit_id = v_test_visit_id;
+
+  if v_rating_score is distinct from 5
+     or v_rating_notes is distinct from 'Valoración actualizada correctamente.' then
+    raise exception 'La valoración no se ha actualizado correctamente.';
+  end if;
+
+  -- No debe aceptar puntuaciones fuera del rango 1-5.
+  v_rating_result := public.save_visit_rating(
+    v_test_visit_id,
+    6,
+    'Puntuación no válida.'
+  );
+
+  if v_rating_result ->> 'code' is distinct from 'INVALID_SCORE' then
+    raise exception 'Falló la validación de puntuación. Resultado: %', v_rating_result;
+  end if;
+
+  -- No debe aceptar anotaciones de más de 2000 caracteres.
+  v_rating_result := public.save_visit_rating(
+    v_test_visit_id,
+    5,
+    pg_catalog.repeat('x', 2001)
+  );
+
+  if v_rating_result ->> 'code' is distinct from 'NOTES_TOO_LONG' then
+    raise exception 'Falló la validación de longitud. Resultado: %', v_rating_result;
+  end if;
   v_cancel_result := public.cancel_visit(v_test_visit_id);
   if v_cancel_result ->> 'success' is distinct from 'true' then
     raise exception 'Falló la cancelación de prueba. Resultado: %', v_cancel_result;
@@ -55,8 +112,8 @@ begin
     raise exception 'La cancelación no conservó la visita con estado cancelled.';
   end if;
 
-  raise notice 'OK: solapamiento, desplazamiento en ambas direcciones, jornada y cancelación.';
-end;
+  raise notice 'OK: solapamiento, desplazamiento en ambas direcciones, jornada, cancelación y valoraciones.';
+  end;
 $$;
 
 rollback;

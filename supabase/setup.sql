@@ -43,7 +43,9 @@ create index if not exists visits_date_start_idx
   on public.visits (visit_date, start_time);
 
 -- 2. RLS: la demo permite leer los datos de ejemplo, pero no escribir directamente.
--- Las escrituras pasan exclusivamente por las funciones create_visit y cancel_visit.
+-- Las escrituras de visitas y valoraciones se realizan mediante funciones RPC:
+-- create_visit, cancel_visit y save_visit_rating.
+
 alter table public.technicians enable row level security;
 alter table public.works enable row level security;
 alter table public.visits enable row level security;
