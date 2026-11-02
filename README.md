@@ -64,35 +64,6 @@ Aplicación web de práctica para planificar visitas de cuatro técnicos a obras
 
 > El repositorio no contiene `.env`. Cada persona configura su propio proyecto Supabase y sus claves. El archivo está excluido de Git mediante `.gitignore`.
 
-## Publicar el repositorio en GitHub
-
-Crea un repositorio **público y vacío** en GitHub (sin añadir README, licencia ni `.gitignore`, porque ya están en este proyecto). Desde la carpeta raíz del proyecto ejecuta:
-
-```bash
-git init
-git add .
-git commit -m "Initial version"
-git branch -M main
-git remote add origin https://github.com/TU-USUARIO/planificador-visitas.git
-git push -u origin main
-```
-
-Antes de hacer `git add`, comprueba que has editado `.env` solo en local: `.gitignore` lo excluye. Puedes verificarlo con `git status --short`.
-
-## Comandos para crear el proyecto desde cero (alternativa)
-
-El repositorio ya contiene estos archivos, por lo que no necesitas repetir este paso al clonarlo. Si quisieras reconstruir el esqueleto manualmente:
-
-```bash
-npm create vite@latest planificador-visitas -- --template react-ts
-cd planificador-visitas
-npm install
-npm install @supabase/supabase-js
-npm install -D tailwindcss @tailwindcss/vite
-```
-
-La integración de Tailwind se hace con el plugin `@tailwindcss/vite` y `@import "tailwindcss"` en `src/index.css`.
-
 ## Estructura del repositorio
 
 ```text
@@ -155,7 +126,7 @@ La cancelación cambia el estado a `cancelled`; no borra la visita. Las consulta
 
 La `Publishable key` (o la antigua `anon key`) está pensada para estar en el cliente; **no es una contraseña**. RLS limita la lectura y evita escrituras directas sobre las tablas. Las funciones RPC se han concedido a los roles `anon` y `authenticated` para que la demo funcione sin pantalla de login. Eso significa que cualquier persona que pueda abrir una instancia pública conectada a ese proyecto puede consultar y modificar la agenda de demostración llamando a esas funciones, no solo desde la interfaz.
 
-Por tanto, usa datos ficticios y un proyecto Supabase dedicado a esta práctica. Antes de producción hay que añadir Supabase Auth, identificar la empresa/usuario y restringir cada operación por pertenencia y permisos. No publiques nunca una `service_role` key ni una Secret key en variables `VITE_*`, porque Vite las incorpora al código del navegador.
+Por tanto, usa datos ficticios y un proyecto Supabase dedicado a esta prueba. Antes de producción hay que añadir Supabase Auth, identificar la empresa/usuario y restringir cada operación por pertenencia y permisos. No publiques nunca una `service_role` key ni una Secret key en variables `VITE_*`, porque Vite las incorpora al código del navegador.
 
 ## Documentación oficial
 
