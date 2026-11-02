@@ -17,7 +17,57 @@ Está construida con **React, TypeScript, Tailwind CSS 4, Vite y Supabase (Postg
 ### Funcionalidad extra
 
 - **Valoración de visitas:** puntuación de 1 a 5 y campo de anotaciones. Las valoraciones pueden crearse y editarse posteriormente.
-  
+
+## Tiempos de desarrollo
+
+En total, el desarrollo de la demo con los requisitos básicos ha requerido una hora.
+La corrección de errores y la implementación de la funcionalidad de valoraciones ha requerido otra hora adicional.
+
+## Justificación, alcance y supuestos
+
+### Qué se ha implementado y propuestas
+
+Se ha implementado el flujo de consulta, programación, validación y cancelación de visitas, junto con los filtros y los datos de demostración. También se ha añadido la posibilidad de registrar y modificar valoraciones con anotaciones.
+
+Propuestas fuera del alcance actual de la prueba:
+
+- Autenticación y permisos por usuario o empresa.
+- Edición de los datos de una visita ya programada, junto con la posibilidad de que el usuario pueda añadir, editar y borrar datos, ( municipios, técnicos, obras y demás ).
+- Gestión de festivos y calendarios individuales por técnico.
+- Cálculo real de rutas y tiempos de desplazamiento entre municipios.
+- Notificaciones externas.
+- Pruebas automatizadas de extremo a extremo.
+
+### Decisiones técnicas
+
+- **Vite** simplifica el desarrollo local y la compilación de producción.
+- **TypeScript** permite detectar incompatibilidades de tipos durante el desarrollo.
+- **Tailwind CSS 4** facilita la implementación de la interfaz mediante clases de utilidad.
+- **Supabase** proporciona PostgreSQL y una API para conectar el frontend con la base de datos.
+- **PostgreSQL RPC** centraliza las reglas críticas para que no dependan exclusivamente de la lógica de React.
+- **Componentes reutilizables** separan responsabilidades: formulario, tabla, modal de valoración y notificaciones.
+
+### Supuestos del sistema
+
+- La empresa trabaja en una única zona horaria operativa: `Europe/Madrid`.
+- Por este motivo, las fechas y horas se almacenan como tipos `date` y `time` locales, no como instantes UTC.
+- Las visitas no pueden cruzar de día.
+- La duración se expresa en minutos, entre 15 y 540, en múltiplos de 15.
+- Los intervalos se interpretan como `[inicio, fin)`: una visita puede empezar justo cuando termina otra si no hay desplazamiento que aplicar.
+- La regla de 30 minutos solo se aplica entre obras distintas. Se asume que no existe desplazamiento adicional cuando dos visitas corresponden a la misma obra.
+- Los 30 minutos constituyen un margen fijo; no representan un tiempo de ruta calculado.
+- La jornada permite terminar exactamente a las 17:00.
+
+## Uso de IA y revisión
+
+Se ha utilizado IA (ChatGPT en navegador) como apoyo para diseñar el modelo de datos, generar el esqueleto de React y redactar las primeras versiones de las funciones SQL.
+
+La primera propuesta para la regla de desplazamiento solo contemplaba la visita anterior. Se corrigió para comprobar también la visita posterior cuando una nueva reserva se inserta antes de otra ya existente.
+
+También se revisó que la validación crítica no dependiera exclusivamente del frontend: se trasladó a PostgreSQL y se añadió un bloqueo transaccional por técnico para cubrir peticiones concurrentes.
+
+Además, se han corregido los errores de sintaxis y estilo que ha generado la IA, principalmente con clases antiguas de Tailwind CSS. Por otro lado, también se han corregido otros errores de importación de módulos y de tipado, que seguramente se deban a la falta de contexto por estar en navegador y no en modo agente.
+
 ## Arranque rápido (objetivo: menos de 10 minutos)
 
 ### Requisitos
@@ -182,51 +232,6 @@ Se comprueban las siguientes reglas:
 La cancelación cambia el estado de la visita a `cancelled`, pero no elimina el registro. Las comprobaciones de disponibilidad únicamente consideran visitas con estado `scheduled`.
 
 Las valoraciones se guardan de forma independiente de la programación. Una valoración puede modificarse sin alterar la fecha, duración o estado de la visita.
-
-## Justificación, alcance y supuestos
-
-### Qué se ha implementado y propuestas
-
-Se ha implementado el flujo de consulta, programación, validación y cancelación de visitas, junto con los filtros y los datos de demostración. También se ha añadido la posibilidad de registrar y modificar valoraciones con anotaciones.
-
-Propuestas fuera del alcance actual de la prueba:
-
-- Autenticación y permisos por usuario o empresa.
-- Edición de los datos de una visita ya programada, junto con la posibilidad de que el usuario pueda añadir, editar y borrar datos, ( municipios, técnicos, obras y demás ).
-- Gestión de festivos y calendarios individuales por técnico.
-- Cálculo real de rutas y tiempos de desplazamiento entre municipios.
-- Notificaciones externas.
-- Pruebas automatizadas de extremo a extremo.
-
-### Decisiones técnicas
-
-- **Vite** simplifica el desarrollo local y la compilación de producción.
-- **TypeScript** permite detectar incompatibilidades de tipos durante el desarrollo.
-- **Tailwind CSS 4** facilita la implementación de la interfaz mediante clases de utilidad.
-- **Supabase** proporciona PostgreSQL y una API para conectar el frontend con la base de datos.
-- **PostgreSQL RPC** centraliza las reglas críticas para que no dependan exclusivamente de la lógica de React.
-- **Componentes reutilizables** separan responsabilidades: formulario, tabla, modal de valoración y notificaciones.
-
-### Supuestos del sistema
-
-- La empresa trabaja en una única zona horaria operativa: `Europe/Madrid`.
-- Por este motivo, las fechas y horas se almacenan como tipos `date` y `time` locales, no como instantes UTC.
-- Las visitas no pueden cruzar de día.
-- La duración se expresa en minutos, entre 15 y 540, en múltiplos de 15.
-- Los intervalos se interpretan como `[inicio, fin)`: una visita puede empezar justo cuando termina otra si no hay desplazamiento que aplicar.
-- La regla de 30 minutos solo se aplica entre obras distintas. Se asume que no existe desplazamiento adicional cuando dos visitas corresponden a la misma obra.
-- Los 30 minutos constituyen un margen fijo; no representan un tiempo de ruta calculado.
-- La jornada permite terminar exactamente a las 17:00.
-
-## Uso de IA y revisión
-
-Se ha utilizado IA (ChatGPT en navegador) como apoyo para diseñar el modelo de datos, generar el esqueleto de React y redactar las primeras versiones de las funciones SQL.
-
-La primera propuesta para la regla de desplazamiento solo contemplaba la visita anterior. Se corrigió para comprobar también la visita posterior cuando una nueva reserva se inserta antes de otra ya existente.
-
-También se revisó que la validación crítica no dependiera exclusivamente del frontend: se trasladó a PostgreSQL y se añadió un bloqueo transaccional por técnico para cubrir peticiones concurrentes.
-
-Además, se han corregido los errores de sintaxis y estilo que ha generado la IA, principalmente con clases antiguas de Tailwind CSS. Por otro lado, también se han corregido otros errores de importación de módulos y de tipado, que seguramente se deban a la falta de contexto por estar en navegador y no en modo agente.
 
 ## Seguridad y límites de la demo
 
