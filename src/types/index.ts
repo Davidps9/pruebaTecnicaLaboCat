@@ -13,6 +13,19 @@ export interface Work {
   address: string | null
 }
 
+export interface VisitRating {
+  visit_id: number
+  score: number
+  notes: string
+  created_at: string
+  updated_at: string
+}
+
+export interface FeedbackMessage {
+  type: 'success' | 'error'
+  message: string
+}
+
 export interface Visit {
   id: number
   visit_date: string
@@ -20,8 +33,11 @@ export interface Visit {
   end_time: string
   duration_minutes: number
   status: VisitStatus
+
   technician: Pick<Technician, 'id' | 'name'> | null
   work: Pick<Work, 'id' | 'name' | 'municipality'> | null
+
+  rating: VisitRating | null
 }
 
 export interface CreateVisitInput {
@@ -32,14 +48,15 @@ export interface CreateVisitInput {
   durationMinutes: number
 }
 
+export interface SaveVisitRatingInput {
+  visitId: number
+  score: number
+  notes: string
+}
+
 export interface RpcResult {
   success: boolean
   code?: string
   message?: string
   visit_id?: number
-}
-
-export interface FeedbackMessage {
-  type: 'success' | 'error'
-  message: string
 }
