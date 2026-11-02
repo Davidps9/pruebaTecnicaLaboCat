@@ -62,11 +62,9 @@ Propuestas fuera del alcance actual de la prueba:
 
 Se ha utilizado IA (ChatGPT en navegador) como apoyo para diseñar el modelo de datos, generar el esqueleto de React y redactar las primeras versiones de las funciones SQL.
 
-La primera propuesta para la regla de desplazamiento solo contemplaba la visita anterior. Se corrigió para comprobar también la visita posterior cuando una nueva reserva se inserta antes de otra ya existente.
+La primera propuesta para la regla de desplazamiento solo contemplaba la visita anterior. Se corrigió mediante iteración para comprobar también la visita posterior cuando una nueva reserva se inserta antes de otra ya existente. Junto con la revisión de que la validación crítica no dependiera exclusivamente del frontend: se trasladó a PostgreSQL y se añadió un bloqueo transaccional por técnico para cubrir peticiones concurrentes.
 
-También se revisó que la validación crítica no dependiera exclusivamente del frontend: se trasladó a PostgreSQL y se añadió un bloqueo transaccional por técnico para cubrir peticiones concurrentes.
-
-Además, se han corregido los errores de sintaxis y estilo que ha generado la IA, principalmente con clases antiguas de Tailwind CSS. Por otro lado, también se han corregido otros errores de importación de módulos y de tipado, que seguramente se deban a la falta de contexto por estar en navegador y no en modo agente.
+En cuanto a corrección de errores, se han corregido principalmente de sintaxis y estilo que ha generado la IA, como por ejemplo clases antiguas de Tailwind CSS. Por otro lado, también se han corregido otros errores de importación de módulos y de tipado, que seguramente se deban a la falta de contexto por estar en navegador y no en modo agente.
 
 ## Arranque rápido (objetivo: menos de 10 minutos)
 
