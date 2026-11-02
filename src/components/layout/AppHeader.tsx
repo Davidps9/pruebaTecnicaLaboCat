@@ -59,7 +59,7 @@ export default function AppHeader({
                     onClick={onRefresh}
                     disabled={refreshing}
                     aria-label="Actualizar agenda"
-                    className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-sky-400/40 hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex items-center gap-2 rounded-xl cursor-pointer border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-sky-400/40 hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     <span className={refreshing ? 'animate-spin' : ''}>
                         ↻

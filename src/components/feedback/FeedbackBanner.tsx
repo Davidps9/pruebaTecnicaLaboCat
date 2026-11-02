@@ -37,7 +37,7 @@ export default function FeedbackBanner({
                 type="button"
                 onClick={onClose}
                 aria-label="Cerrar notificación"
-                className="shrink-0 text-current opacity-60 transition hover:opacity-100"
+                className="shrink-0 text-current cursor-pointer opacity-60 transition hover:opacity-100"
             >
                 ✕
             </button>

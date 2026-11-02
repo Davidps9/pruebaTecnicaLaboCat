@@ -101,7 +101,7 @@ export default function VisitRatingModal({
                         onClick={onClose}
                         disabled={saving}
                         aria-label="Cerrar"
-                        className="rounded-lg px-2 py-1 text-xl text-slate-500 transition hover:bg-slate-800 hover:text-white disabled:opacity-40"
+                        className="rounded-lg px-2 py-1 text-xl cursor-pointer text-slate-500 transition hover:bg-slate-800 hover:text-white disabled:opacity-40"
                     >
                         ×
                     </button>
@@ -132,7 +132,7 @@ export default function VisitRatingModal({
                                     }}
                                     aria-label={`${value} de 5 estrellas`}
                                     aria-pressed={score === value}
-                                    className={`text-4xl transition hover:scale-110 disabled:cursor-not-allowed ${value <= score
+                                    className={`text-4xl transition cursor-pointer hover:scale-110 disabled:cursor-not-allowed ${value <= score
                                         ? 'text-amber-400'
                                         : 'text-slate-700'
                                         }`}
@@ -206,7 +206,7 @@ export default function VisitRatingModal({
                             type="button"
                             onClick={onClose}
                             disabled={saving}
-                            className="rounded-xl border border-slate-700 px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-50"
+                            className="rounded-xl border cursor-pointer border-slate-700 px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-50"
                         >
                             Cancelar
                         </button>
@@ -214,7 +214,7 @@ export default function VisitRatingModal({
                         <button
                             type="submit"
                             disabled={saving}
-                            className="rounded-xl bg-sky-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-xl bg-sky-400 px-5 cursor-pointer py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {saving
                                 ? 'Guardando valoración…'

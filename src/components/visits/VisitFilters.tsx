@@ -38,7 +38,7 @@ export default function VisitFilters({
 
             <input
                 aria-label="Filtrar por fecha"
-                className="field min-w-36 py-2 text-xs [color-scheme:dark]"
+                className="field min-w-36 py-2 text-xs scheme:dark"
                 type="date"
                 value={dateFilter}
                 onChange={(event) => onDateChange(event.target.value)}
@@ -48,7 +48,7 @@ export default function VisitFilters({
                 <button
                     type="button"
                     onClick={onClear}
-                    className="rounded-lg px-3 py-2 text-xs font-medium text-sky-300 transition hover:bg-sky-300/10"
+                    className="rounded-lg px-3 py-2 cursor-pointer text-xs font-medium text-sky-300 transition hover:bg-sky-300/10"
                 >
                     Limpiar filtros
                 </button>

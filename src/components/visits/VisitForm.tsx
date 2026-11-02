@@ -230,7 +230,7 @@ export default function VisitForm({
           technicians.length === 0 ||
           works.length === 0
         }
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-400 px-4 py-3 font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-sky-400 px-4 py-3 font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? (
           <>
