@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #e5edf7;
+  background: #0b1220;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; }
+button, input, select { font: inherit; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+::selection { background: #155e75; color: #ecfeff; }
+
+.panel {
+  border: 1px solid rgba(148, 163, 184, 0.13);
+  background: linear-gradient(145deg, rgba(20, 31, 49, 0.96), rgba(14, 24, 40, 0.96));
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.14);
+}
+
+.field {
+  width: 100%;
+  border: 1px solid #334155;
+  border-radius: 0.75rem;
+  background: #0b1423;
+  color: #e2e8f0;
+  padding: 0.7rem 0.8rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.field:hover { border-color: #475569; }
+.field:focus { border-color: #38bdf8; outline: none; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12); }
+.field:disabled { cursor: not-allowed; opacity: 0.55; }
+
+.muted-scrollbar { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+.muted-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+.muted-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
